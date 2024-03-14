@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">BaseTest</string>
+    <string name="app_paste_id_token">paste ID token</string>
+    <string name="app_process_id_token">Process ID token</string>
+    <string name="app_generate_mobile_payload">Generate mobile payload</string>
+    <string name="app_confirmation_dialog_ok">OK</string>
+    <string name="app_confirmation_dialog_cancel">CANCEL</string>
+    <string name="app_device_paired_successfully">Device is paired successfully</string>
+    <string name="app_allow_pairing_question">Allow pairing?</string>
+    <string name="app_allow_pairing_description">Do you want to pair this device?</string>
 </resources>
