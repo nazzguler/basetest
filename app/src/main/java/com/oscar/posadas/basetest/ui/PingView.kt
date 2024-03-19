@@ -4,8 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.Text
@@ -18,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.oscar.posadas.basetest.R
@@ -57,13 +62,21 @@ fun PingView(
                 .padding(bottom = 16.dp),
             backgroundColor = Color(0xFFA8DBE5)
         ) {
-            Text(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        clipboardManager.setText(AnnotatedString(state.value.mobilePayload.orEmpty()))
-                    }, textAlign = TextAlign.Center, text = state.value.mobilePayload.orEmpty()
-            )
+                    .height(70.dp)
+                    .verticalScroll(
+                        rememberScrollState()
+                    )
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            clipboardManager.setText(AnnotatedString(state.value.mobilePayload.orEmpty()))
+                        }, textAlign = TextAlign.Center, text = state.value.mobilePayload.orEmpty()
+                )
+            }
         }
         Button(
             onClick = processIdToken, text = stringResource(id = R.string.app_process_id_token)
@@ -71,15 +84,28 @@ fun PingView(
         Card(
             modifier = Modifier.fillMaxWidth(), backgroundColor = Color(0xFFA8DBE5)
         ) {
-            TextField(
-                value = state.value.idToken.orEmpty(),
-                placeholder = { Text(stringResource(R.string.app_paste_id_token)) },
-                onValueChange = { onIdTokenChange(it) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = Color.Transparent
+            Column(
+                modifier = Modifier
+                    .height(70.dp)
+                    .verticalScroll(
+                        rememberScrollState()
+                    )
+            ) {
+                TextField(
+                    value = state.value.idToken.orEmpty(),
+                    placeholder = { Text(stringResource(R.string.app_paste_id_token)) },
+                    onValueChange = { onIdTokenChange(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { processIdToken() })
                 )
-            )
+            }
         }
         if (state.value.showAllowPairingDialog) {
             ConfirmationDialog(

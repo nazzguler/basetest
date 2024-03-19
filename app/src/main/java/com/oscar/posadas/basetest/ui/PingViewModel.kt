@@ -13,6 +13,7 @@ internal class PingViewModel(
     private val pingOneRepository: PingOneRepository
 ) : ViewModel() {
 
+    private val tag = PingViewModel::class.java.name
     private val _state = MutableStateFlow(PingViewModelState())
     val state: StateFlow<PingViewModelState>
         get() = _state.asStateFlow()
@@ -35,16 +36,26 @@ internal class PingViewModel(
 
     fun processIdToken() {
         viewModelScope.launch {
-            val response = pingOneRepository.processIdToken(state.value.idToken.orEmpty())
-            if (response.error != null) {
-                _state.value = _state.value.copy(alertMsg = response.error)
-            }
-            if (response.pairingObject != null) {
-                Log.i(PingViewModel::class.java.name, "processIdToken() -> pairingKey: ${response.pairingObject}")
-                _state.value = _state.value.copy(
-                    pairingObject = response.pairingObject,
-                    showAllowPairingDialog = true
-                )
+            var log = "processIdToken() -> "
+            try {
+                val response = pingOneRepository.processIdToken(state.value.idToken.orEmpty())
+                if (response.error != null) {
+                    log += "error: ${response.error}"
+                    Log.e(tag, log)
+                    _state.value = _state.value.copy(alertMsg = response.error.message)
+                }
+                if (response.pairingObject != null) {
+                    log += "success: ${response.pairingObject}"
+                    Log.i(tag, log)
+                    _state.value = _state.value.copy(
+                        pairingObject = response.pairingObject,
+                        showAllowPairingDialog = true
+                    )
+                }
+            } catch (e: Exception) {
+                log += "error: $e"
+                Log.e(tag, log)
+                _state.value = _state.value.copy(alertMsg = e.message)
             }
         }
     }
@@ -52,11 +63,15 @@ internal class PingViewModel(
     fun approvePairingDevice(successMsg: String) {
         viewModelScope.launch {
             state.value.pairingObject?.let {
+                var log = "approvePairingInfo() -> "
                 val pairingResponse = pingOneRepository.approvePairingDevice(it)
                 _state.value = if (pairingResponse.error != null) {
-                    _state.value.copy(alertMsg = pairingResponse.error)
+                    log += "error: ${pairingResponse.error}"
+                    Log.e(tag, log)
+                    _state.value.copy(alertMsg = pairingResponse.error.message)
                 } else {
-                    Log.i(PingViewModel::class.java.name, "pairingInfo: ${pairingResponse.pairingInfo}")
+                    log += "success: ${pairingResponse.pairingInfo}"
+                    Log.i(tag, log)
                     _state.value.copy(alertMsg = successMsg)
                 }
                 _state.value = _state.value.copy(showAllowPairingDialog = false)

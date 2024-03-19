@@ -2,7 +2,7 @@ package com.oscar.posadas.basetest.repository
 
 import android.content.Context
 import com.oscar.posadas.basetest.model.ApprovePairingDeviceResponse
-import com.oscar.posadas.basetest.model.GetOneTimePasscodeResponse
+import com.oscar.posadas.basetest.model.OneTimePasscodeResponse
 import com.oscar.posadas.basetest.model.ProcessIdTokenResponse
 import com.pingidentity.pingidsdkv2.PairingObject
 import com.pingidentity.pingidsdkv2.PingOne
@@ -15,7 +15,7 @@ internal class PingOneRepositoryImpl(private val context: Context) : PingOneRepo
         return suspendCoroutine {
             var r = ProcessIdTokenResponse()
             PingOne.processIdToken(token) { pairingObject, error ->
-                r = r.copy(error = error?.toString(), pairingObject = pairingObject)
+                r = r.copy(error = error, pairingObject = pairingObject)
                 it.resume(r)
             }
         }
@@ -27,17 +27,17 @@ internal class PingOneRepositoryImpl(private val context: Context) : PingOneRepo
             pairingObject.approve(
                 context
             ) { pairingInfo, error ->
-                r = r.copy(error = error?.toString(), pairingInfo = pairingInfo)
+                r = r.copy(error = error, pairingInfo = pairingInfo)
                 it.resume(r)
             }
         }
     }
 
-    override suspend fun getOneTimePasscode(): GetOneTimePasscodeResponse {
+    override suspend fun getOneTimePasscode(): OneTimePasscodeResponse {
         return suspendCoroutine {
-            var r = GetOneTimePasscodeResponse()
+            var r = OneTimePasscodeResponse()
             PingOne.getOneTimePassCode(context) { oneTimePasswordInfo, error ->
-                r = r.copy(error = error?.toString(), oneTimePasscodeInfo = oneTimePasswordInfo)
+                r = r.copy(error = error, oneTimePasscodeInfo = oneTimePasswordInfo)
                 it.resume(r)
             }
         }
