@@ -2,44 +2,56 @@ package com.oscar.posadas.basetest.ui
 
 import android.os.CountDownTimer
 import android.util.Log
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oscar.posadas.basetest.mvi.ViewModel
 import com.oscar.posadas.basetest.repository.PingOneRepository
+import com.oscar.posadas.basetest.ui.PingViewEvent.AllowPairingDialogVisibility
+import com.oscar.posadas.basetest.ui.PingViewEvent.ApprovePairingDevice
+import com.oscar.posadas.basetest.ui.PingViewEvent.DismissAlert
+import com.oscar.posadas.basetest.ui.PingViewEvent.GenerateMobilPayload
+import com.oscar.posadas.basetest.ui.PingViewEvent.ProcessIdToken
+import com.oscar.posadas.basetest.ui.PingViewEvent.StartPassCodeSequence
+import com.oscar.posadas.basetest.ui.PingViewEvent.UpdateIdToken
 import com.oscar.posadas.basetest.utils.MILLIS
 import com.pingidentity.pingidsdkv2.types.OneTimePasscodeInfo
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 internal class PingViewModel(
     private val pingOneRepository: PingOneRepository
-) : ViewModel() {
+) : ViewModel<PingViewModelState, PingViewEvent>(PingViewModelState()) {
 
     private val tag = PingViewModel::class.java.name
-    private val _state = MutableStateFlow(PingViewModelState())
-    val state: StateFlow<PingViewModelState>
-        get() = _state.asStateFlow()
+    override fun processEvent(event: PingViewEvent) {
+        when (event) {
+            is AllowPairingDialogVisibility -> allowPairingDialogVisibility(event.isVisible)
+            is ApprovePairingDevice -> approvePairingDevice(event.successMsg)
+            DismissAlert -> dismissAlert()
+            GenerateMobilPayload -> generateMobilePayload()
+            ProcessIdToken -> processIdToken()
+            StartPassCodeSequence -> startPassCodeSequence()
+            is UpdateIdToken -> updateIdToken(event.token)
+        }
+    }
 
-    fun generateMobilePayload() {
+    private fun generateMobilePayload() {
         _state.value = _state.value.copy(mobilePayload = pingOneRepository.getMobilePayload())
     }
 
-    fun updateIdToken(token: String) {
+    private fun updateIdToken(token: String?) {
         _state.value = _state.value.copy(idToken = token)
     }
 
-    fun allowPairingDialogVisibility(isVisible: Boolean) {
+    private fun allowPairingDialogVisibility(isVisible: Boolean) {
         _state.value = _state.value.copy(showAllowPairingDialog = isVisible)
     }
 
-    fun dismissAlert() {
+    private fun dismissAlert() {
         _state.value = _state.value.copy(alertMsg = null)
     }
 
-    fun processIdToken() {
+    private fun processIdToken() {
         viewModelScope.launch {
             var log = "processIdToken() -> "
             try {
@@ -65,7 +77,7 @@ internal class PingViewModel(
         }
     }
 
-    fun approvePairingDevice(successMsg: String) {
+    private fun approvePairingDevice(successMsg: String) {
         viewModelScope.launch {
             state.value.pairingObject?.let {
                 var log = "approvePairingInfo() -> "
@@ -84,7 +96,7 @@ internal class PingViewModel(
         }
     }
 
-    fun startPassCodeSequence() {
+    private fun startPassCodeSequence() {
         if (state.value.isDevicePaired) {
             viewModelScope.launch {
                 val r = pingOneRepository.getOneTimePasscode()

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import com.oscar.posadas.basetest.R
 import com.oscar.posadas.basetest.repository.PingOneRepository
 import com.oscar.posadas.basetest.ui.theme.BaseTestTheme
 
@@ -31,13 +30,7 @@ internal class PingActivity : ComponentActivity() {
                     vm.run {
                         PingView(
                             vmState = state,
-                            getMobilePayload = this::generateMobilePayload,
-                            onIdTokenChange = this::updateIdToken,
-                            processIdToken = this::processIdToken,
-                            dismissAllowPairingDialog = { allowPairingDialogVisibility(isVisible = false) },
-                            approvePairingDevice = { approvePairingDevice(getString(R.string.app_device_paired_successfully)) },
-                            dismissAlert = this::dismissAlert,
-                            startPasscodeSequence = this::startPassCodeSequence
+                            onPingEvent = this::processEvent
                         )
                     }
                 }
