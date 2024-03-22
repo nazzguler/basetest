@@ -1,12 +1,17 @@
 package com.oscar.posadas.basetest.ui
 
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oscar.posadas.basetest.repository.PingOneRepository
+import com.oscar.posadas.basetest.utils.MILLIS
+import com.pingidentity.pingidsdkv2.types.OneTimePasscodeInfo
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 internal class PingViewModel(
@@ -72,9 +77,46 @@ internal class PingViewModel(
                 } else {
                     log += "success: ${pairingResponse.pairingInfo}"
                     Log.i(tag, log)
-                    _state.value.copy(alertMsg = successMsg)
+                    _state.value.copy(alertMsg = successMsg, isDevicePaired = true)
                 }
                 _state.value = _state.value.copy(showAllowPairingDialog = false)
+            }
+        }
+    }
+
+    fun startPassCodeSequence() {
+        if (state.value.isDevicePaired) {
+            viewModelScope.launch {
+                val r = pingOneRepository.getOneTimePasscode()
+                r.oneTimePasscodeInfo?.let {
+                    startAnimation(it)
+                } ?: run {
+                    r.error?.let {
+                        _state.value.copy(alertMsg = it.message)
+                    }
+                    _state.value.copy(passcode = "Passcode error", passcodeTimer = "")
+                }
+            }
+        } else {
+            _state.value = _state.value.copy(passcode = "Not Initialized", passcodeTimer = "")
+        }
+    }
+
+    private suspend fun startAnimation(otpData: OneTimePasscodeInfo) {
+        val runTime = (otpData.validUntil * MILLIS - System.currentTimeMillis()).toLong()
+        coroutineScope {
+            _state.value = _state.value.copy(passcode = otpData.passcode)
+            object : CountDownTimer(runTime, MILLIS) {
+                override fun onTick(millisUntilFinished: Long) {
+                    _state.value =
+                        _state.value.copy(passcodeTimer = ((millisUntilFinished / MILLIS)).toString() + "s")
+                }
+
+                override fun onFinish() {
+                    if (!coroutineContext.isActive) {
+                        startPassCodeSequence()
+                    }
+                }
             }
         }
     }

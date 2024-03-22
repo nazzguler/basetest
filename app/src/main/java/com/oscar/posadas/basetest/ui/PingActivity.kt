@@ -11,7 +11,7 @@ import com.oscar.posadas.basetest.R
 import com.oscar.posadas.basetest.repository.PingOneRepository
 import com.oscar.posadas.basetest.ui.theme.BaseTestTheme
 
-internal class MainActivity : ComponentActivity() {
+internal class PingActivity : ComponentActivity() {
 
     private val vm by lazy {
         PingViewModel(
@@ -31,12 +31,13 @@ internal class MainActivity : ComponentActivity() {
                     vm.run {
                         PingView(
                             vmState = state,
-                            getMobilePayload = { generateMobilePayload() },
-                            onIdTokenChange = { updateIdToken(it) },
-                            processIdToken = { processIdToken() },
+                            getMobilePayload = this::generateMobilePayload,
+                            onIdTokenChange = this::updateIdToken,
+                            processIdToken = this::processIdToken,
                             dismissAllowPairingDialog = { allowPairingDialogVisibility(isVisible = false) },
                             approvePairingDevice = { approvePairingDevice(getString(R.string.app_device_paired_successfully)) },
-                            dismissAlert = { dismissAlert() }
+                            dismissAlert = this::dismissAlert,
+                            startPasscodeSequence = this::startPassCodeSequence
                         )
                     }
                 }

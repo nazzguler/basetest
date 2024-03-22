@@ -8,4 +8,5 @@
     <string name="app_device_paired_successfully">Device is paired successfully</string>
     <string name="app_allow_pairing_question">Allow pairing?</string>
     <string name="app_allow_pairing_description">Do you want to pair this device?</string>
+    <string name="app_start_passcode_sequence">Start Passcode Sequence</string>
 </resources>
