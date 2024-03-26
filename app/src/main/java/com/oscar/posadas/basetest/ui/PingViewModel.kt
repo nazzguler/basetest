@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.oscar.posadas.basetest.mvi.ViewModel
 import com.oscar.posadas.basetest.repository.PingOneRepository
+import com.oscar.posadas.basetest.ui.PassCodeState.NotInitialized
+import com.oscar.posadas.basetest.ui.PassCodeState.PassCodeReceived
+import com.oscar.posadas.basetest.ui.PassCodeState.PasscodeError
 import com.oscar.posadas.basetest.ui.PingViewEvent.AllowPairingDialogVisibility
 import com.oscar.posadas.basetest.ui.PingViewEvent.ApprovePairingDevice
 import com.oscar.posadas.basetest.ui.PingViewEvent.DismissAlert
@@ -106,18 +109,18 @@ internal class PingViewModel(
                     r.error?.let {
                         _state.value.copy(alertMsg = it.message)
                     }
-                    _state.value.copy(passcode = "Passcode error", passcodeTimer = "")
+                    _state.value.copy(passcode = PasscodeError, passcodeTimer = "")
                 }
             }
         } else {
-            _state.value = _state.value.copy(passcode = "Not Initialized", passcodeTimer = "")
+            _state.value = _state.value.copy(passcode = NotInitialized, passcodeTimer = "")
         }
     }
 
     private suspend fun startAnimation(otpData: OneTimePasscodeInfo) {
         val runTime = (otpData.validUntil * MILLIS - System.currentTimeMillis()).toLong()
         coroutineScope {
-            _state.value = _state.value.copy(passcode = otpData.passcode)
+            _state.value = _state.value.copy(passcode = PassCodeReceived(otpData.passcode))
             object : CountDownTimer(runTime, MILLIS) {
                 override fun onTick(millisUntilFinished: Long) {
                     _state.value =

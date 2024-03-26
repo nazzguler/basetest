@@ -18,12 +18,15 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.oscar.posadas.basetest.R
+import com.oscar.posadas.basetest.ui.PassCodeState.NotInitialized
+import com.oscar.posadas.basetest.ui.PassCodeState.PassCodeReceived
+import com.oscar.posadas.basetest.ui.PassCodeState.PasscodeError
 import com.oscar.posadas.basetest.ui.common.Button
 
 @Composable
 fun PasscodeSequenceView(
     startPasscodeSequence: () -> Unit,
-    passcode: String? = null,
+    passcode: PassCodeState? = null,
     passcodeTimer: String? = null
 ) {
     val clipboardManager = LocalClipboardManager.current
@@ -44,12 +47,13 @@ fun PasscodeSequenceView(
                     rememberScrollState()
                 )
         ) {
+            val passcodeString = passcode?.asString().orEmpty()
             Text(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable {
-                        clipboardManager.setText(AnnotatedString(passcode.orEmpty()))
-                    }, textAlign = TextAlign.Center, text = passcode.orEmpty()
+                        clipboardManager.setText(AnnotatedString(passcodeString))
+                    }, textAlign = TextAlign.Center, text = passcodeString
             )
         }
     }
@@ -58,4 +62,10 @@ fun PasscodeSequenceView(
             .fillMaxWidth(),
         textAlign = TextAlign.Center, text = passcodeTimer.orEmpty()
     )
+}
+
+@Composable
+private fun PassCodeState.asString() = when (this) {
+    NotInitialized, PasscodeError -> this.resId?.let { stringResource(id = it) }
+    is PassCodeReceived -> this.passcode
 }

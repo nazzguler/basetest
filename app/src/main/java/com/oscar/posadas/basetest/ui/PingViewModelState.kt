@@ -8,7 +8,7 @@ data class PingViewModelState(
     val idToken: String? = null,
     val showAllowPairingDialog: Boolean = false,
     val pairingObject: PairingObject? = null,
-    val passcode: String? = null,
+    val passcode: PassCodeState? = null,
     val passcodeTimer: String? = null,
     val isDevicePaired: Boolean = false
 )

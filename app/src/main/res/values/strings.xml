@@ -9,4 +9,6 @@
     <string name="app_allow_pairing_question">Allow pairing?</string>
     <string name="app_allow_pairing_description">Do you want to pair this device?</string>
     <string name="app_start_passcode_sequence">Start Passcode Sequence</string>
+    <string name="app_passcode_not_initialized">Not initialized</string>
+    <string name="app_passcode_error">Passcode error</string>
 </resources>
