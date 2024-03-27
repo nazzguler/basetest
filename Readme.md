@@ -1,1 +1,1 @@
-Base project with initial gradle setup and imported libraries for testing
+Ping test app (based on the base app) with MVI pattern and Jetpack compose 
